@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
+import VueCropper from 'vue-cropper'
+import 'vue-cropper/dist/vue-cropper.css'
 
 // 使用 Pinia Store
 const userStore = useUserStore()
@@ -13,6 +15,19 @@ const editBio = ref('')
 
 // 头像上传 input 引用
 const avatarInputRef = ref<HTMLInputElement | null>(null)
+
+// 头像裁剪相关
+const showCropper = ref(false)
+const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null)
+const cropperImage = ref('')
+const cropperOptions = ref({
+  viewMode: 1,
+  aspectRatio: 1,
+  autoCropArea: 0.8,
+  dragMode: 'move',
+  cropBoxMovable: true,
+  cropBoxResizable: true
+})
 
 // 格式化日期
 const formatDate = (dateString: string | undefined) => {
@@ -70,11 +85,49 @@ const cancelEditBio = () => {
 }
 
 // 处理头像上传
-const handleAvatarChange = async (event: Event) => {
+const handleAvatarChange = (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    await userStore.uploadUserAvatar(input.files[0])
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      cropperImage.value = e.target?.result as string
+      showCropper.value = true
+    }
+    reader.readAsDataURL(input.files[0])
   }
+}
+
+// 确认裁剪
+const confirmCrop = async () => {
+  if (cropperRef.value) {
+    cropperRef.value.getCropData(async (dataURL: string) => {
+      // 将 base64 转换为 Blob
+      const blob = dataURLToBlob(dataURL)
+      if (blob) {
+        await userStore.uploadUserAvatar(blob)
+        showCropper.value = false
+      }
+    })
+  }
+}
+
+// 取消裁剪
+const cancelCrop = () => {
+  showCropper.value = false
+  cropperImage.value = ''
+}
+
+// base64 转 Blob
+const dataURLToBlob = (dataURL: string) => {
+  const arr = dataURL.split(',')
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
+  const bstr = atob(arr[1])
+  let n = bstr.length
+  const u8arr = new Uint8Array(n)
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n)
+  }
+  return new Blob([u8arr], { type: mime })
 }
 
 // 处理登出
@@ -197,6 +250,28 @@ onMounted(() => {
         style="margin-top: 1rem"
       />
     </div>
+
+    <!-- 头像裁剪对话框 -->
+    <el-dialog
+      v-model="showCropper"
+      title="裁剪头像"
+      width="600px"
+    >
+      <div class="cropper-container">
+        <vue-cropper
+          ref="cropperRef"
+          :img="cropperImage"
+          :options="cropperOptions"
+          style="width: 100%; height: 400px"
+        />
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancelCrop">取消</el-button>
+          <el-button type="primary" @click="confirmCrop">确认</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -268,6 +343,10 @@ onMounted(() => {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.cropper-container {
+  margin-bottom: 1rem;
 }
 
 .actions {

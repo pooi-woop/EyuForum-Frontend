@@ -72,15 +72,15 @@ const handleSelect = (path: string) => {
     <!-- 用户区域 - 已登录 -->
     <el-sub-menu v-if="isLoggedIn" index="user">
       <template #title>
-        <el-avatar :size="32" :src="userStore.avatarUrl" />
+        <el-avatar :size="36" :src="userStore.avatarUrl" />
         <span class="username">{{ userStore.displayName }}</span>
       </template>
       <el-menu-item index="profile">
-        <el-icon><User /></el-icon>
+        <el-icon class="menu-icon"><User /></el-icon>
         个人中心
       </el-menu-item>
       <el-menu-item index="logout">
-        <el-icon><SwitchButton /></el-icon>
+        <el-icon class="menu-icon"><SwitchButton /></el-icon>
         退出登录
       </el-menu-item>
     </el-sub-menu>
@@ -125,7 +125,7 @@ const handleSelect = (path: string) => {
 }
 
 .logo {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #fff;
 }
@@ -137,6 +137,11 @@ const handleSelect = (path: string) => {
 .username {
   margin-left: 8px;
   color: #fff;
+}
+
+.menu-icon {
+  font-size: 18px;
+  margin-right: 6px;
 }
 
 /* 移动端适配 */
