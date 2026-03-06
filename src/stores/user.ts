@@ -15,7 +15,6 @@ export interface User {
   is_admin?: boolean
   is_verified?: boolean
   created_at: string
-  deleted_at?: string // 注销时间
 }
 
 // 使用 Pinia 创建用户状态管理 Store

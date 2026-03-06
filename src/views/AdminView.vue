@@ -185,15 +185,15 @@ const deleteUser = (userId: string, userName: string) => {
 
 // 删除帖子
 const deletePost = (postId: string, postTitle: string) => {
+  const stringPostId = String(postId)
   ElMessageBox.confirm(`确定要删除帖子 "${postTitle}" 吗？此操作不可撤销！`, {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'error',
-    title: '警告'
+    type: 'warning'
   }).then(async () => {
     try {
       isLoading.value = true
-      await postApi.deletePost(postId.toString())
+      await postApi.deletePost(stringPostId)
       ElMessage.success('帖子删除成功')
       await fetchPosts()
     } catch (err: any) {
@@ -209,15 +209,15 @@ const deletePost = (postId: string, postTitle: string) => {
 
 // 删除评论
 const deleteComment = (commentId: string) => {
+  const stringCommentId = String(commentId)
   ElMessageBox.confirm('确定要删除这条评论吗？此操作不可撤销！', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'error',
-    title: '警告'
+    type: 'warning'
   }).then(async () => {
     try {
       isLoading.value = true
-      await commentApi.deleteComment(commentId.toString())
+      await commentApi.deleteComment(stringCommentId)
       ElMessage.success('评论删除成功')
       await fetchComments()
     } catch (err: any) {
@@ -233,7 +233,8 @@ const deleteComment = (commentId: string) => {
 
 // 查看帖子详情
 const viewPostDetail = (postId: string) => {
-  router.push(`/forum/${postId}`)
+  const stringPostId = String(postId)
+  router.push(`/forum/${stringPostId}`)
 }
 </script>
 
@@ -324,9 +325,18 @@ const viewPostDetail = (postId: string) => {
               </el-link>
             </template>
           </el-table-column>
-          <el-table-column label="作者" width="120">
+          <el-table-column label="作者" width="150">
             <template #default="{ row }">
-              {{ getUserName(row.user || {}) }}
+              <div class="author-info">
+                <el-avatar 
+                  :src="row.user?.avatar" 
+                  :size="24"
+                  class="author-avatar"
+                >
+                  {{ getUserName(row.user || {}).charAt(0) }}
+                </el-avatar>
+                <span class="author-name">{{ getUserName(row.user || {}) }}</span>
+              </div>
             </template>
           </el-table-column>
           <el-table-column prop="views" label="浏览" width="80" align="center" />
@@ -359,9 +369,18 @@ const viewPostDetail = (postId: string) => {
         >
           <el-table-column prop="id" label="评论ID" width="180" />
           <el-table-column prop="content" label="内容" min-width="400" />
-          <el-table-column label="作者" width="120">
+          <el-table-column label="作者" width="150">
             <template #default="{ row }">
-              {{ getUserName(row.user || {}) }}
+              <div class="author-info">
+                <el-avatar 
+                  :src="row.user?.avatar" 
+                  :size="24"
+                  class="author-avatar"
+                >
+                  {{ getUserName(row.user || {}).charAt(0) }}
+                </el-avatar>
+                <span class="author-name">{{ getUserName(row.user || {}) }}</span>
+              </div>
             </template>
           </el-table-column>
           <el-table-column prop="created_at" label="发布时间" width="180">
@@ -450,6 +469,22 @@ h1 {
   margin-top: 2rem;
   display: flex;
   justify-content: center;
+}
+
+/* 作者信息样式 */
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.author-avatar {
+  flex-shrink: 0;
+}
+
+.author-name {
+  font-size: 0.9rem;
+  color: #606266;
 }
 
 @media (max-width: 768px) {

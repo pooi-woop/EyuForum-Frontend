@@ -51,15 +51,15 @@ const fetchMyPosts = async () => {
 
 // 删除帖子
 const deletePost = (postId: string | number, postTitle: string) => {
+  const stringPostId = String(postId)
   ElMessageBox.confirm(`确定要删除帖子 "${postTitle}" 吗？此操作不可撤销！`, {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'error',
-    title: '警告'
+    type: 'warning'
   }).then(async () => {
     try {
       isLoading.value = true
-      await postApi.deletePost(postId.toString())
+      await postApi.deletePost(stringPostId)
       ElMessage.success('帖子删除成功')
       // 重新获取帖子列表
       await fetchMyPosts()
@@ -76,7 +76,8 @@ const deletePost = (postId: string | number, postTitle: string) => {
 
 // 跳转到帖子详情
 const goToPostDetail = (postId: string | number) => {
-  router.push(`/forum/${postId}`)
+  const stringPostId = String(postId)
+  router.push(`/forum/${stringPostId}`)
 }
 
 // 处理分页

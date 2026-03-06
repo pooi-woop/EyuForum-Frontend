@@ -77,11 +77,6 @@ export const userApi = {
   // 获取用户列表（管理员）
   getUsers: (params: { page: number; page_size: number }): Promise<any> => {
     return api.get('/users', { params })
-  },
-  
-  // 搜索用户
-  searchUsers: (keyword: string): Promise<any> => {
-    return api.get('/users/search', { params: { keyword } })
   }
 }
 
@@ -196,37 +191,40 @@ export const favoriteApi = {
   },
   
   // 更新收藏夹
-  updateFolder: (folderId: string, data: { name: string }): Promise<any> => {
+  updateFolder: (folderId: number, data: { name: string }): Promise<any> => {
     return api.put(`/folders/${folderId}`, data)
   },
-  
+
   // 删除收藏夹
-  deleteFolder: (folderId: string): Promise<any> => {
+  deleteFolder: (folderId: number): Promise<any> => {
     return api.delete(`/folders/${folderId}`)
   },
-  
+
   // 收藏帖子
-  addFavorite: (data: { post_id: string; folder_id: string }): Promise<any> => {
+  addFavorite: (data: { post_id: string; folder_id: number }): Promise<any> => {
     return api.post('/favorites', data)
   },
   
   // 取消收藏
   removeFavorite: (postId: string): Promise<any> => {
-    return api.delete(`/posts/${postId}/favorite`)
+    console.log('removeFavorite API 被调用，postId:', postId, '类型:', typeof postId)
+    const url = `/posts/${postId}/favorite`
+    console.log('请求 URL:', url)
+    return api.delete(url)
   },
   
   // 移动收藏
-  moveFavorite: (postId: string, data: { folder_id: string }): Promise<any> => {
+  moveFavorite: (postId: string, data: { folder_id: number }): Promise<any> => {
     return api.put(`/posts/${postId}/favorite`, data)
   },
-  
+
   // 获取收藏列表
   getFavorites: (params: { page: number; page_size: number }): Promise<any> => {
     return api.get('/my/favorites', { params })
   },
-  
+
   // 按收藏夹获取
-  getFolderPosts: (folderId: string, params: { page: number; page_size: number }): Promise<any> => {
+  getFolderPosts: (folderId: number, params: { page: number; page_size: number }): Promise<any> => {
     return api.get(`/folders/${folderId}/posts`, { params })
   }
 }
@@ -240,11 +238,7 @@ export const blockApi = {
   
   // 取消拉黑
   unblockUser: (userId: string): Promise<any> => {
-    return api.delete(`/users/${userId}/block`, {
-      params: {
-        t: Date.now() // 添加时间戳避免缓存
-      }
-    })
+    return api.delete(`/users/${userId}/block`)
   },
   
   // 获取拉黑列表

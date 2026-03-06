@@ -605,11 +605,6 @@ onMounted(() => {
           <span class="value">{{ userStore.user?.is_verified ? '已验证' : '未验证' }}</span>
         </div>
 
-        <!-- 注销时间 -->
-        <div class="info-item">
-          <span class="label">注销时间：</span>
-          <span class="value">{{ userStore.user?.deleted_at ? formatDate(userStore.user.deleted_at) : '活动中' }}</span>
-        </div>
       </div>
 
       <!-- 操作按钮 -->

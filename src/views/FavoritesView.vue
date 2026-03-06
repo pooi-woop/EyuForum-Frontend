@@ -9,7 +9,7 @@ const router = useRouter()
 
 // 状态管理
 const folders = ref<any[]>([])
-const selectedFolder = ref<string | null>(null)
+const selectedFolder = ref<number | null>(null)
 const posts = ref<any[]>([])
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -19,6 +19,12 @@ const error = ref('')
 const showCreateFolderDialog = ref(false)
 const newFolderName = ref('')
 const createFolderLoading = ref(false)
+
+// 移动收藏相关状态
+const showMoveFolderDialog = ref(false)
+const moveFolderLoading = ref(false)
+const targetFolderId = ref<number | null>(null)
+const currentMovePostId = ref<string>('')
 
 // 页面加载时检查登录状态
 onMounted(async () => {
@@ -78,7 +84,7 @@ const fetchFolders = async () => {
 }
 
 // 获取收藏夹中的帖子
-const fetchFolderPosts = async (folderId: string) => {
+const fetchFolderPosts = async (folderId: number) => {
   try {
     isLoading.value = true
     error.value = ''
@@ -92,20 +98,51 @@ const fetchFolderPosts = async (folderId: string) => {
     })
     
     console.log('获取收藏帖子响应:', response)
-    
+
     // 处理不同的响应格式
+    // 后端返回格式: { favorites: [{ post: {...}, folder_id: ..., folder_name: ..., created_at: ... }], total: ... }
+    let favorites: any[] = []
     if (response && Array.isArray(response)) {
-      posts.value = response
-      total.value = response.length
+      favorites = response
     } else if (response && typeof response === 'object') {
-      posts.value = response.data || response.posts || []
-      total.value = response.total || posts.value.length
-    } else {
-      posts.value = []
-      total.value = 0
+      favorites = response.favorites || response.data || response.posts || []
     }
-    
+
+    // 将 favorites 转换为 posts 格式，提取 post 数据并添加收藏相关信息
+    console.log('favorites 数据:', favorites)
+    posts.value = favorites.map((fav: any, index: number) => {
+      console.log(`处理第 ${index} 个 favorite:`, fav)
+      
+      // 检查 fav 是否是 post 对象（直接返回 posts 数组的情况）
+      // 还是包含 post 属性的对象（返回 favorites 数组的情况）
+      if (fav.id) {
+        // fav 是 post 对象
+        console.log(`fav 是 post 对象，id:`, fav.id)
+        return {
+          ...fav,
+          folder_id: fav.folder_id,
+          folder_name: fav.folder_name,
+          favorited_at: fav.created_at
+        }
+      } else if (fav.post) {
+        // fav 包含 post 属性
+        console.log(`fav.post:`, fav.post)
+        console.log(`fav.post.id:`, fav.post?.id)
+        return {
+          ...fav.post,
+          folder_id: fav.folder_id,
+          folder_name: fav.folder_name,
+          favorited_at: fav.created_at
+        }
+      } else {
+        console.error(`第 ${index} 个 favorite 数据格式错误:`, fav)
+        return null
+      }
+    }).filter(post => post !== null)
+    total.value = response.total || posts.value.length
+
     console.log('解析后的帖子列表:', posts.value)
+    console.log('第一个帖子的 id:', posts.value[0]?.id)
     console.log('总数量:', total.value)
   } catch (err: any) {
     console.error('获取收藏帖子错误:', err)
@@ -117,7 +154,7 @@ const fetchFolderPosts = async (folderId: string) => {
 }
 
 // 切换收藏夹
-const handleFolderChange = async (folderId: string) => {
+const handleFolderChange = async (folderId: number) => {
   selectedFolder.value = folderId
   currentPage.value = 1
   await fetchFolderPosts(folderId)
@@ -157,7 +194,7 @@ const createFolder = async () => {
 }
 
 // 删除收藏夹
-const deleteFolder = async (folderId: string, folderName: string) => {
+const deleteFolder = async (folderId: number, folderName: string) => {
   ElMessageBox.confirm(`确定要删除收藏夹 "${folderName}" 吗？`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -185,10 +222,13 @@ const deleteFolder = async (folderId: string, folderName: string) => {
 
 // 取消收藏
 const removeFavorite = async (postId: string) => {
+  console.log('removeFavorite 被调用，postId:', postId, '类型:', typeof postId)
+  const stringPostId = String(postId)
+  console.log('转换后的 stringPostId:', stringPostId)
   try {
     isLoading.value = true
     
-    await favoriteApi.removeFavorite(postId)
+    await favoriteApi.removeFavorite(stringPostId)
     
     ElMessage.success('取消收藏成功')
     
@@ -204,49 +244,54 @@ const removeFavorite = async (postId: string) => {
   }
 }
 
-// 移动收藏
-const moveFavorite = async (postId: string) => {
-  // 显示移动收藏对话框
-  const { value: newFolderId } = await ElMessageBox.prompt(
-    '请选择目标收藏夹',
-    '移动收藏',
-    {
-      inputPlaceholder: '请输入收藏夹ID',
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      inputValidator: (value) => {
-        if (!value) {
-          return '请输入收藏夹ID'
-        }
-        return true
-      }
-    }
-  )
+// 打开移动收藏对话框
+const openMoveFolderDialog = (postId: string) => {
+  // 过滤掉当前收藏夹，只显示其他收藏夹
+  const otherFolders = folders.value.filter(f => f.id !== selectedFolder.value)
   
-  if (newFolderId) {
-    try {
-      isLoading.value = true
-      
-      await favoriteApi.moveFavorite(postId, { folder_id: newFolderId })
-      
-      ElMessage.success('移动收藏成功')
-      
-      // 重新获取当前收藏夹的帖子
-      if (selectedFolder.value) {
-        await fetchFolderPosts(selectedFolder.value)
-      }
-    } catch (err: any) {
-      console.error('移动收藏错误:', err)
-      ElMessage.error(err.response?.error || '移动收藏失败')
-    } finally {
-      isLoading.value = false
+  if (otherFolders.length === 0) {
+    ElMessage.warning('没有其他收藏夹可以移动')
+    return
+  }
+  
+  currentMovePostId.value = String(postId)
+  targetFolderId.value = otherFolders[0]?.id || null
+  showMoveFolderDialog.value = true
+}
+
+// 执行移动收藏
+const handleMoveFavorite = async () => {
+  if (!targetFolderId.value || !currentMovePostId.value) {
+    ElMessage.warning('请选择目标收藏夹')
+    return
+  }
+  
+  try {
+    moveFolderLoading.value = true
+    
+    await favoriteApi.moveFavorite(currentMovePostId.value, { folder_id: targetFolderId.value })
+    
+    ElMessage.success('移动收藏成功')
+    showMoveFolderDialog.value = false
+    targetFolderId.value = null
+    currentMovePostId.value = ''
+    
+    // 重新获取当前收藏夹的帖子
+    if (selectedFolder.value) {
+      await fetchFolderPosts(selectedFolder.value)
     }
+  } catch (err: any) {
+    console.error('移动收藏错误:', err)
+    ElMessage.error(err.response?.error || '移动收藏失败')
+  } finally {
+    moveFolderLoading.value = false
   }
 }
 
 // 跳转到帖子详情
 const goToPostDetail = (postId: string) => {
-  router.push(`/forum/${postId}`)
+  const stringPostId = String(postId)
+  router.push(`/forum/${stringPostId}`)
 }
 
 // 处理分页
@@ -347,15 +392,24 @@ const formatDate = (dateStr: string) => {
             </template>
           </el-table-column>
           
-          <el-table-column label="作者" width="120">
+          <el-table-column label="作者" width="150">
             <template #default="{ row }">
-              {{ row.user?.nickname || row.user?.email?.split('@')[0] || '匿名用户' }}
+              <div class="author-info">
+                <el-avatar 
+                  :src="row.user?.avatar" 
+                  :size="24"
+                  class="author-avatar"
+                >
+                  {{ (row.user?.nickname || row.user?.email?.split('@')[0] || '匿').charAt(0) }}
+                </el-avatar>
+                <span class="author-name">{{ row.user?.nickname || row.user?.email?.split('@')[0] || '匿名用户' }}</span>
+              </div>
             </template>
           </el-table-column>
           
           <el-table-column label="收藏时间" width="180">
             <template #default="{ row }">
-              {{ formatDate(row.created_at) }}
+              {{ formatDate(row.favorited_at) }}
             </template>
           </el-table-column>
           
@@ -364,7 +418,7 @@ const formatDate = (dateStr: string) => {
               <el-button 
                 type="primary" 
                 size="small" 
-                @click="moveFavorite(row.id)"
+                @click="openMoveFolderDialog(row.id)"
               >
                 移动
               </el-button>
@@ -424,6 +478,43 @@ const formatDate = (dateStr: string) => {
             :loading="createFolderLoading"
           >
             创建
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+    
+    <!-- 移动收藏对话框 -->
+    <el-dialog
+      v-model="showMoveFolderDialog"
+      title="移动收藏"
+      width="400px"
+    >
+      <el-form label-width="100px">
+        <el-form-item label="目标收藏夹">
+          <el-select
+            v-model="targetFolderId"
+            placeholder="请选择目标收藏夹"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="folder in folders.filter(f => f.id !== selectedFolder)"
+              :key="folder.id"
+              :label="folder.name"
+              :value="folder.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showMoveFolderDialog = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="handleMoveFavorite"
+            :loading="moveFolderLoading"
+            :disabled="!targetFolderId"
+          >
+            移动
           </el-button>
         </span>
       </template>
@@ -512,6 +603,22 @@ h2 {
   margin-top: 2rem;
   display: flex;
   justify-content: center;
+}
+
+/* 作者信息样式 */
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.author-avatar {
+  flex-shrink: 0;
+}
+
+.author-name {
+  font-size: 0.9rem;
+  color: #606266;
 }
 
 @media (max-width: 768px) {

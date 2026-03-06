@@ -84,7 +84,8 @@ const fetchBlockedUsers = async () => {
       total.value = 0
     }
     
-    // 过滤掉已经取消拉黑的用户
+    // 后端现在只返回未取消拉黑的用户（unblocked_at 为 null 的）
+    // 但为了兼容性，仍然保留过滤逻辑
     console.log('过滤前的用户数量:', blockedUsers.value.length)
     blockedUsers.value = blockedUsers.value.filter(user => !isUserUnblocked(user))
     console.log('过滤后的用户数量:', blockedUsers.value.length)
@@ -97,7 +98,13 @@ const fetchBlockedUsers = async () => {
   } catch (err: any) {
     console.error('获取拉黑列表错误:', err)
     console.error('错误响应:', err.response)
-    error.value = err.response?.error || '获取拉黑列表失败'
+    // 只有真正的错误才显示错误信息，空列表不算错误
+    if (err.response?.status && err.response?.status !== 200) {
+      error.value = err.response?.data?.error || err.response?.error || '获取拉黑列表失败'
+    }
+    // 清空列表
+    blockedUsers.value = []
+    total.value = 0
   } finally {
     console.log('获取拉黑列表完成，设置isLoading为false')
     isLoading.value = false
@@ -105,16 +112,21 @@ const fetchBlockedUsers = async () => {
 }
 
 // 取消拉黑
-const unblockUser = (userId: string, userName: string) => {
+const unblockUser = (userId: string | number, userName: string) => {
   console.log('unblockUser 被调用:', { userId, userName })
   console.log('userId 类型:', typeof userId)
   console.log('userId 是否为空:', !userId)
   
-  if (!userId) {
+  // 确保 userId 是字符串类型，避免大数字精度问题
+  const stringUserId = String(userId)
+  
+  if (!stringUserId) {
     console.error('userId 为空，无法取消拉黑')
     ElMessage.error('用户ID无效')
     return
   }
+  
+  console.log('处理后的 userId:', stringUserId)
   
   ElMessageBox.confirm(`确定要取消拉黑用户 "${userName}" 吗？`, '提示', {
     confirmButtonText: '确定',
@@ -124,9 +136,9 @@ const unblockUser = (userId: string, userName: string) => {
     try {
       isLoading.value = true
       
-      console.log('开始取消拉黑用户:', userId)
-      console.log('调用 blockApi.unblockUser:', userId)
-      await blockApi.unblockUser(userId)
+      console.log('开始取消拉黑用户:', stringUserId)
+      console.log('调用 blockApi.unblockUser:', stringUserId)
+      await blockApi.unblockUser(stringUserId)
       
       ElMessage.success('取消拉黑成功')
       
@@ -138,13 +150,13 @@ const unblockUser = (userId: string, userName: string) => {
       console.error('错误响应:', err.response)
       console.error('错误信息:', err.message)
       
-      // 处理 "Not blocked" 错误 - 用户已经不是拉黑状态
-      if (err.response?.data?.error === 'Not blocked') {
+      // 处理 "not blocked" 错误 - 用户已经不是拉黑状态
+      if (err.response?.data?.error === 'not blocked') {
         console.log('用户已经不是拉黑状态，标记为已取消')
         // 本地标记用户为已取消
         blockedUsers.value = blockedUsers.value.map(user => {
           const userIdToCheck = user.id || user.user?.id
-          if (userIdToCheck === userId) {
+          if (String(userIdToCheck) === stringUserId) {
             return {
               ...user,
               is_blocked: false,
@@ -155,7 +167,7 @@ const unblockUser = (userId: string, userName: string) => {
         })
         ElMessage.success('用户已取消拉黑')
       } else {
-        ElMessage.error(err.response?.error || '取消拉黑失败')
+        ElMessage.error(err.response?.data?.error || '取消拉黑失败')
       }
     } finally {
       console.log('取消拉黑操作完成，设置isLoading为false')
@@ -168,9 +180,11 @@ const unblockUser = (userId: string, userName: string) => {
 }
 
 // 查看用户资料
-const viewUserProfile = (userId: string) => {
+const viewUserProfile = (userId: string | number) => {
+  // 确保 userId 是字符串类型，避免大数字精度问题
+  const stringUserId = String(userId)
   // 跳转到用户资料页面
-  router.push(`/user/${userId}`)
+  router.push(`/user/${stringUserId}`)
 }
 
 // 处理分页
@@ -201,10 +215,9 @@ const getUserName = (user: any) => {
 
 // 检查用户是否已被取消拉黑
 const isUserUnblocked = (user: any) => {
-  // 检查多种可能的字段
-  return user.is_blocked === false || 
-         user.unblocked_at !== undefined || 
-         user.status === 'unblocked'
+  // 后端现在只查询 unblocked_at 字段
+  // 如果 unblocked_at 有值，表示已取消拉黑
+  return user.unblocked_at !== null && user.unblocked_at !== undefined
 }
 
 // 获取用户状态文本

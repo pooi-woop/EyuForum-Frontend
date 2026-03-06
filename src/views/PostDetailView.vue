@@ -276,10 +276,18 @@ const fetchPostFolders = async () => {
 
 // 收藏帖子
 const handleFavorite = async () => {
+  // 检查 postId 是否有效
+  if (!postId.value) {
+    ElMessage.error('帖子ID无效')
+    return
+  }
+  
+  const stringPostId = String(postId.value)
+  
   try {
     isFavoriting.value = true
     
-    console.log('开始处理收藏，postId:', postId.value)
+    console.log('开始处理收藏，postId:', stringPostId)
     console.log('当前选择的收藏夹:', selectedFolders.value)
     console.log('原本所在的收藏夹:', originalFolders.value)
     
@@ -297,7 +305,7 @@ const handleFavorite = async () => {
       try {
         console.log('正在添加到收藏夹:', folderId)
         const response = await favoriteApi.addFavorite({
-          post_id: postId.value,
+          post_id: stringPostId,
           folder_id: folderId
         })
         console.log('添加到收藏夹', folderId, '成功:', response)
@@ -313,7 +321,7 @@ const handleFavorite = async () => {
         console.log('正在从收藏夹移除:', folderId)
         // 使用 moveFavorite 接口将帖子移出收藏夹
         // 或者使用 removeFavorite 接口
-        const response = await favoriteApi.removeFavorite(postId.value)
+        const response = await favoriteApi.removeFavorite(stringPostId)
         console.log('从收藏夹移除成功:', response)
       } catch (err: any) {
         console.error('从收藏夹移除失败:', err)

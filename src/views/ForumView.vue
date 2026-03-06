@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { postApi, userApi } from '../services/userApi'
+import { postApi } from '../services/userApi'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { Search, User } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
 const posts = ref<any[]>([])
-const users = ref<any[]>([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -75,45 +74,19 @@ const searchPosts = async () => {
   }
 }
 
-// 搜索用户
-const searchUsers = async () => {
-  if (!searchKeyword.value.trim()) {
-    users.value = []
-    return
-  }
-  
-  try {
-    console.log('开始搜索用户:', searchKeyword.value.trim())
-    const response = await userApi.searchUsers(searchKeyword.value.trim())
-    console.log('搜索用户响应:', response)
-    users.value = response.users || response || []
-  } catch (err: any) {
-    console.error('搜索用户错误:', err)
-    users.value = []
-  }
-}
-
-// 查看用户主页
-const goToUserProfile = (userId: string) => {
-  console.log('查看用户主页:', userId)
-  if (!userId) {
-    ElMessage.error('用户ID无效')
-    return
-  }
-  router.push(`/user/${userId}`)
-}
-
 const goToPostDetail = (postId: string | number) => {
   console.log('点击帖子，ID:', postId)
-  if (!postId) {
+  const stringPostId = String(postId)
+  if (!stringPostId) {
     error.value = '帖子ID无效'
     return
   }
-  router.push(`/forum/${postId}`)
+  router.push(`/forum/${stringPostId}`)
 }
 
 // 删除帖子
 const deletePost = (postId: string | number) => {
+  const stringPostId = String(postId)
   ElMessageBox.confirm('确定要删除这个帖子吗？此操作不可撤销！', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -121,7 +94,7 @@ const deletePost = (postId: string | number) => {
   }).then(async () => {
     try {
       isLoading.value = true
-      await postApi.deletePost(postId.toString())
+      await postApi.deletePost(stringPostId)
       ElMessage.success('帖子删除成功')
       // 重新获取帖子列表
       await fetchPosts()
@@ -145,12 +118,11 @@ const handleSearch = async () => {
   if (searchKeyword.value.trim()) {
     console.log('执行搜索:', searchKeyword.value.trim())
     currentPage.value = 1 // 重置到第一页
-    // 同时搜索帖子和用户
-    await Promise.all([searchPosts(), searchUsers()])
+    // 只搜索帖子
+    await searchPosts()
   } else {
     console.log('清空搜索，获取所有帖子')
     searchKeyword.value = ''
-    users.value = []
     currentPage.value = 1
     fetchPosts()
   }
@@ -216,29 +188,6 @@ onMounted(() => {
       </el-button>
     </div>
 
-    <!-- 用户搜索结果 -->
-    <div v-if="users.length > 0 && searchKeyword.trim()" class="users-section">
-      <h2 class="section-title">相关用户</h2>
-      <div class="users-list">
-        <div
-          v-for="user in users"
-          :key="user.id"
-          class="user-card"
-          @click="goToUserProfile(user.id)"
-        >
-          <el-avatar
-            :size="50"
-            :src="user.avatar || ''"
-            :icon="User"
-          />
-          <div class="user-info">
-            <div class="user-name">{{ user.nickname || user.email?.split('@')[0] || '未知用户' }}</div>
-            <div v-if="user.bio" class="user-bio">{{ user.bio }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 帖子列表 -->
     <h2 v-if="searchKeyword.trim()" class="section-title">相关帖子</h2>
     <el-table
@@ -266,9 +215,18 @@ onMounted(() => {
         </template>
       </el-table-column>
       
-      <el-table-column label="作者" width="120">
+      <el-table-column label="作者" width="150">
         <template #default="{ row }">
-          {{ getAuthorName(row) }}
+          <div class="author-info">
+            <el-avatar 
+              :src="row.user?.avatar" 
+              :size="24"
+              class="author-avatar"
+            >
+              {{ getAuthorName(row).charAt(0) }}
+            </el-avatar>
+            <span class="author-name">{{ getAuthorName(row) }}</span>
+          </div>
         </template>
       </el-table-column>
       
@@ -373,6 +331,22 @@ onMounted(() => {
   width: 100%;
 }
 
+/* 作者信息样式 */
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.author-avatar {
+  flex-shrink: 0;
+}
+
+.author-name {
+  font-size: 0.9rem;
+  color: #606266;
+}
+
 /* 删除按钮样式 */
 .delete-button {
   flex-shrink: 0;
@@ -385,11 +359,6 @@ onMounted(() => {
   opacity: 1;
 }
 
-/* 用户搜索结果样式 */
-.users-section {
-  margin-bottom: 2rem;
-}
-
 .section-title {
   color: #333;
   font-size: 1.2rem;
@@ -399,69 +368,15 @@ onMounted(() => {
   border-left: 4px solid #409eff;
 }
 
-.users-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0 1rem;
-}
-
-.user-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f5f7fa;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  min-width: 250px;
-  flex: 1;
-}
-
-.user-card:hover {
-  background: #e6f2ff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.user-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.user-name {
-  font-weight: bold;
-  color: #333;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
-}
-
-.user-bio {
-  color: #666;
-  font-size: 0.875rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (max-width: 768px) {
   .forum-container {
     padding: 1rem;
   }
-  
+
   .forum-header {
     flex-direction: column;
     gap: 1rem;
     padding: 0;
-  }
-  
-  .users-list {
-    padding: 0;
-  }
-  
-  .user-card {
-    min-width: 100%;
   }
 }
 </style>
