@@ -84,11 +84,8 @@ const fetchBlockedUsers = async () => {
       total.value = 0
     }
     
-    // 后端现在只返回未取消拉黑的用户（unblocked_at 为 null 的）
-    // 但为了兼容性，仍然保留过滤逻辑
-    console.log('过滤前的用户数量:', blockedUsers.value.length)
-    blockedUsers.value = blockedUsers.value.filter(user => !isUserUnblocked(user))
-    console.log('过滤后的用户数量:', blockedUsers.value.length)
+    // 显示所有被拉黑过的用户（包括已释放的）
+    console.log('获取到的用户数量:', blockedUsers.value.length)
     total.value = blockedUsers.value.length
     
     console.log('解析后的数据:', {
@@ -179,6 +176,52 @@ const unblockUser = (userId: string | number, userName: string) => {
   })
 }
 
+// 重新拉黑用户
+const reblockUser = (userId: string | number, userName: string) => {
+  console.log('reblockUser 被调用:', { userId, userName })
+
+  // 确保 userId 是字符串类型，避免大数字精度问题
+  const stringUserId = String(userId)
+
+  if (!stringUserId) {
+    console.error('userId 为空，无法重新拉黑')
+    ElMessage.error('用户ID无效')
+    return
+  }
+
+  console.log('处理后的 userId:', stringUserId)
+
+  ElMessageBox.confirm(`确定要重新拉黑用户 "${userName}" 吗？`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      isLoading.value = true
+
+      console.log('开始重新拉黑用户:', stringUserId)
+      await blockApi.blockUser(stringUserId)
+
+      ElMessage.success('重新拉黑成功')
+
+      // 重新获取拉黑列表
+      console.log('重新获取拉黑列表...')
+      await fetchBlockedUsers()
+    } catch (err: any) {
+      console.error('重新拉黑错误:', err)
+      console.error('错误响应:', err.response)
+
+      ElMessage.error(err.response?.data?.error || '重新拉黑失败')
+    } finally {
+      console.log('重新拉黑操作完成，设置isLoading为false')
+      isLoading.value = false
+    }
+  }).catch(() => {
+    // 取消操作
+    console.log('取消重新拉黑操作')
+  })
+}
+
 // 查看用户资料
 const viewUserProfile = (userId: string | number) => {
   // 确保 userId 是字符串类型，避免大数字精度问题
@@ -223,7 +266,7 @@ const isUserUnblocked = (user: any) => {
 // 获取用户状态文本
 const getUserStatusText = (user: any) => {
   if (isUserUnblocked(user)) {
-    return '已取消'
+    return '已释放'
   }
   return '已拉黑'
 }
@@ -314,11 +357,11 @@ const getBlockTime = (user: any) => {
           </el-button>
           <el-button 
             v-else
-            type="default" 
+            type="warning" 
             size="small" 
-            disabled
+            @click="reblockUser(row.id || row.user?.id, getUserName(row.user || row))"
           >
-            已取消
+            重新拉黑
           </el-button>
         </template>
       </el-table-column>
@@ -326,7 +369,7 @@ const getBlockTime = (user: any) => {
     
     <!-- 空状态 -->
     <div v-if="blockedUsers.length === 0 && !isLoading" class="empty-blocked">
-      <el-empty description="暂无拉黑用户" />
+      <el-empty description="暂无拉黑记录" />
     </div>
     
     <!-- 分页 -->
