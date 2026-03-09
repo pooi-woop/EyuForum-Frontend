@@ -7,15 +7,10 @@
         v-for="(item, index) in socialLinks" 
         :key="index"
         :href="item.link" 
-        target="_blank" 
-        class="social-link"
+        target="_blank"
+        class="image-link"
       >
-        <el-image
-          :src="item.image"
-          fit="contain"
-          class="social-image"
-        />
-        <span class="social-text">{{ item.name || `平台 ${index + 1}` }}</span>
+        <img :src="item.image" class="social-image" />
       </a>
     </div>
   </div>
@@ -78,40 +73,26 @@ const socialLinks = [
 
 .social-links {
   display: flex;
-  gap: 3rem;
-  margin-top: 3rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
   width: 80%;
   margin-left: auto;
   margin-right: auto;
   max-width: 1200px;
 }
 
-.social-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.image-link {
+  display: block;
   text-decoration: none;
-  color: #333;
-  transition: transform 0.3s ease;
-}
-
-.social-link:hover {
-  transform: translateY(-5px);
+  width: 100%;
 }
 
 .social-image {
-  width: 200px;
-  height: 200px;
-  margin-bottom: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.social-text {
-  font-size: 1rem;
-  font-weight: 500;
+  width: 100%;
+  max-width: 1200px;
+  height: auto;
+  object-fit: contain;
 }
 </style>
 

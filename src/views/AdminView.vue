@@ -4,8 +4,10 @@ import { useRouter } from 'vue-router'
 import { userApi, postApi, commentApi, adminApi } from '../services/userApi'
 import { tokenManager } from '../utils/auth'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 // 状态管理
 const users = ref<any[]>([])
@@ -29,8 +31,12 @@ onMounted(async () => {
     return
   }
   
+  // 确保用户信息已加载
+  if (!userStore.user) {
+    await userStore.init()
+  }
+  
   // 检查是否为管理员
-  const userStore = (await import('@/stores/user')).useUserStore()
   if (!userStore.user?.is_admin) {
     error.value = '无管理员权限'
     setTimeout(() => {
@@ -45,6 +51,7 @@ onMounted(async () => {
 
 // 获取用户列表
 const fetchUsers = async () => {
+  console.log('fetchUsers 被调用，当前页:', currentPage.value)
   try {
     isLoading.value = true
     error.value = ''
@@ -59,7 +66,9 @@ const fetchUsers = async () => {
       params.keyword = searchKeyword.value.trim()
     }
     
+    console.log('准备调用 adminApi.getUsers，参数:', params)
     const response = await adminApi.getUsers(params)
+    console.log('adminApi.getUsers 响应:', response)
     
     users.value = response.users || response.data || response || []
     total.value = response.total || 0

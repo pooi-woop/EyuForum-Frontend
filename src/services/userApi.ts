@@ -80,6 +80,14 @@ export const userApi = {
   }
 }
 
+// 综合搜索 API
+export const searchApi = {
+  // 综合搜索（用户和帖子）
+  search: (params: { keyword: string; page: number; page_size: number }): Promise<any> => {
+    return api.get('/search', { params })
+  }
+}
+
 // 帖子相关 API
 export const postApi = {
   // 获取帖子列表

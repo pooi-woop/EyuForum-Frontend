@@ -38,10 +38,10 @@ const goToProfile = () => {
 
 const handleSearch = () => {
   if (searchKeyword.value.trim()) {
-    // 跳转到搜索页面或论坛页面并传递搜索关键词
+    // 跳转到搜索结果页面并传递搜索关键词
     router.push({
-      path: '/forum',
-      query: { search: searchKeyword.value.trim() }
+      path: '/search',
+      query: { keyword: searchKeyword.value.trim() }
     })
     searchKeyword.value = ''
   }
