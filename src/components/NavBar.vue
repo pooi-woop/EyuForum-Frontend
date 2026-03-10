@@ -93,7 +93,7 @@ const handleLogoutAll = async () => {
   >
     <!-- Logo -->
     <el-menu-item index="/" class="logo-item">
-      <span class="logo">bbsDemo</span>
+      <span class="logo">EyuForum</span>
     </el-menu-item>
 
     <!-- 导航链接 -->
