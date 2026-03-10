@@ -213,6 +213,21 @@ const cancelReply = () => {
   replyContent.value = ''
 }
 
+// 删除评论
+const deleteComment = async (commentId: string) => {
+  try {
+    await commentApi.deleteComment(commentId)
+    ElMessage.success('删除评论成功')
+    // 重新获取评论列表
+    await fetchComments()
+    // 更新帖子评论数
+    post.value.comment_count = Math.max(0, (post.value.comment_count || 0) - 1)
+  } catch (err: any) {
+    console.error('删除评论错误:', err)
+    ElMessage.error(err.response?.data?.error || '删除评论失败')
+  }
+}
+
 // 提交回复
 const submitReply = async (parentCommentId: string) => {
   if (!replyContent.value.trim()) {
@@ -665,6 +680,16 @@ onMounted(async () => {
             <el-button type="primary" link size="small" @click="showReplyInput(comment.id)">
               回复
             </el-button>
+            <el-popconfirm
+              title="确定要删除这条评论吗？"
+              @confirm="deleteComment(comment.id)"
+            >
+              <template #reference>
+                <el-button type="danger" link size="small">
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
           </div>
           <!-- 回复输入框 -->
           <div v-if="replyToCommentId === comment.id" class="reply-input-section">
@@ -690,6 +715,18 @@ onMounted(async () => {
               </div>
               <div class="reply-content">
                 {{ reply.content }}
+              </div>
+              <div class="reply-actions">
+                <el-popconfirm
+                  title="确定要删除这条回复吗？"
+                  @confirm="deleteComment(reply.id)"
+                >
+                  <template #reference>
+                    <el-button type="danger" link size="small">
+                      删除
+                    </el-button>
+                  </template>
+                </el-popconfirm>
               </div>
             </div>
           </div>
