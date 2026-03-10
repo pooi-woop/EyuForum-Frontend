@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authApi } from '../services/userApi'
 import { tokenManager } from '../utils/auth'
-import { useUserStore } from '@/stores/user'
+import { useUserStore } from '../stores/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
