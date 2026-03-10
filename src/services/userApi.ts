@@ -153,7 +153,7 @@ export const commentApi = {
   },
   
   // 创建回复（楼中楼）
-  createReply: (data: { post_id: string; comment_id: number; content: string }): Promise<any> => {
+  createReply: (data: { comment_id: string; content: string }): Promise<any> => {
     return api.post('/comments', data)
   },
   
