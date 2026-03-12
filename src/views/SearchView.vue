@@ -20,9 +20,7 @@
         <div class="posts-list">
           <div v-for="post in posts" :key="post.id" class="post-item" @click="goToPostDetail(post.id)">
             <div class="post-header">
-              <el-avatar :src="post.user?.avatar" :size="32" class="author-avatar">
-                {{ post.user?.nickname?.charAt(0) }}
-              </el-avatar>
+              <Avatar :src="post.user?.avatar" :size="32" :fallback-text="post.user?.nickname?.charAt(0)" class="author-avatar" />
               <span class="author-name">{{ post.user?.nickname }}</span>
               <span class="post-time">{{ formatDate(post.created_at) }}</span>
             </div>
@@ -42,9 +40,7 @@
         <h2 class="section-title">用户 ({{ total.users }})</h2>
         <div class="users-list">
           <div v-for="user in users" :key="user.id" class="user-item" @click="goToUserProfile(user.id)">
-            <el-avatar :src="user.avatar" :size="60" class="user-avatar">
-              {{ user.nickname?.charAt(0) }}
-            </el-avatar>
+            <Avatar :src="user.avatar" :size="60" :fallback-text="user.nickname?.charAt(0)" class="user-avatar" />
             <div class="user-info">
               <h4 class="user-name">{{ user.nickname }}</h4>
               <p class="user-bio">{{ user.bio || '暂无简介' }}</p>
@@ -84,6 +80,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { searchApi } from '@/services/userApi'
 import { Loading, View, Star, ChatDotRound } from '@element-plus/icons-vue'
+import Avatar from '@/components/Avatar.vue'
 
 const route = useRoute()
 const router = useRouter()

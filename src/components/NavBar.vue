@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/user'
 import { User, SwitchButton, Search, Refresh, Setting, Message, ChatLineRound } from '@element-plus/icons-vue'
 import { tokenManager } from '@/utils/auth'
 import { ElMessage } from 'element-plus'
+import Avatar from './Avatar.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -125,13 +126,7 @@ const handleLogoutAll = async () => {
     <!-- 用户区域 - 已登录 -->
     <el-sub-menu v-if="isLoggedIn" index="user">
       <template #title>
-        <div class="avatar-container">
-          <img 
-            :src="userStore.avatarUrl" 
-            @error="(e) => e.target.src = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
-            class="avatar"
-          />
-        </div>
+        <Avatar :src="userStore.avatarUrl" :size="36" />
         <span class="username">{{ userStore.displayName }}</span>
       </template>
       <el-menu-item index="profile">
@@ -255,20 +250,6 @@ const handleLogoutAll = async () => {
 
 .inbox-icon:hover {
   color: #fff;
-}
-
-.avatar-container {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 8px;
-}
-
-.avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 /* 移动端适配 */

@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { postApi, commentApi, likeApi, favoriteApi, blockApi, userApi, adminApi } from '../services/userApi'
 import { ElMessage, ElDropdown, ElDropdownMenu, ElDropdownItem, ElCheckboxGroup, ElCheckbox, ElAvatar, ElPopconfirm } from 'element-plus'
+import Avatar from '../components/Avatar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -514,9 +515,7 @@ onMounted(async () => {
       <div class="post-meta">
         <div class="author-info">
           <router-link :to="`/user/${post.user?.id}`" class="author-link">
-            <el-avatar :src="post.user?.avatar" :size="32" class="author-avatar">
-              {{ post.user?.nickname?.charAt(0) || '匿' }}
-            </el-avatar>
+            <Avatar :src="post.user?.avatar" :size="32" :fallback-text="post.user?.nickname?.charAt(0) || '匿'" class="author-avatar" />
             <span class="post-author">{{ post.user?.nickname || '匿名用户' }}</span>
           </router-link>
           <el-popconfirm

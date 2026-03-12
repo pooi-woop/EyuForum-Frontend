@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { authApi } from '@/services/userApi'
+import Avatar from './Avatar.vue'
 // 移除 vue-cropper 导入，改用原生实现
 
 // 使用 Pinia Store
@@ -513,7 +514,7 @@ onMounted(() => {
     <div v-else class="profile-content">
       <!-- 头像区域 -->
       <div class="avatar-section">
-        <el-avatar :size="100" :src="userStore.avatarUrl" />
+        <Avatar :src="userStore.avatarUrl" :size="100" />
         <div class="avatar-upload">
           <input
             ref="avatarInputRef"
