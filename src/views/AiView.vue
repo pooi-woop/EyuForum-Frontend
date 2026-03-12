@@ -89,10 +89,6 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
   try {
     isStreamingLoading.value = true
     
-    const response = await aiApi.askStream({ question })
-    const stream = response.data
-    
-    let answer = ''
     const aiMessageId = generateId()
     
     // 添加一个空的AI回复，后续会更新
@@ -103,15 +99,34 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
       timestamp: Date.now()
     })
     
-    return new Promise<void>((resolve, reject) => {
-      stream.on('data', (chunk: any) => {
-        const text = chunk.toString()
-        const lines = text.split('\n')
+    const response = await fetch('http://localhost:8080/api/ai/ask/stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ question })
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const reader = response.body?.getReader()
+    const decoder = new TextDecoder()
+    let answer = ''
+    
+    if (reader) {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
         
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.substring(6).trim()
-            if (data) {
+            if (data && data !== '[DONE]') {
               answer += data + '\n'
               
               // 更新AI回复内容
@@ -122,24 +137,11 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
             }
           }
         }
-      })
-      
-      stream.on('end', () => {
-        isStreamingLoading.value = false
-        resolve()
-      })
-      
-      stream.on('error', (err: any) => {
-        console.error('流式传输错误:', err)
-        isStreamingLoading.value = false
-        ElMessage.error('流式传输失败')
-        reject(err)
-      })
-    })
+      }
+    }
   } catch (err: any) {
     console.error('AI 流式问答错误:', err)
-    ElMessage.error(err.response?.data?.error || 'AI 流式问答失败')
-    isStreamingLoading.value = false
+    ElMessage.error(err.message || 'AI 流式问答失败')
     
     // 添加错误消息
     messages.value.push({
@@ -148,6 +150,8 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
       role: 'ai',
       timestamp: Date.now()
     })
+  } finally {
+    isStreamingLoading.value = false
   }
 }
 
