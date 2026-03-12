@@ -1613,54 +1613,94 @@ Authorization: Bearer <access_token>
 **测试用例：**
 1. 正常获取：`GET /api/my/favorites?page=1&page_size=10`
 
-### 6.9 按收藏夹获取收藏
+## 7. AI 接口
+
+### 7.1 AI 问答
 
 **请求：**
 ```http
-GET /api/folders/1/posts?page=1&page_size=10
-Authorization: Bearer <access_token>
+POST /api/ai/ask
+Content-Type: application/json
+
+{
+  "question": "如何使用Elasticsearch？"
+}
 ```
 
 **响应：**
 ```json
 {
-  "favorites": [
-    {
-      "post": {
-        "id": 1234567890123456789,
-        "title": "Hello World",
-        "content": "This is a test post",
-        "views": 10,
-        "created_at": "2023-01-01T00:00:00Z",
-        "user": {
-          "id": 1234567890123456789,
-          "email": "user@example.com",
-          "nickname": "User"
-        }
-      },
-      "created_at": "2023-01-01T00:00:00Z"
-    }
-  ],
-  "total": 1
+  "answer": "Elasticsearch是一个开源的搜索引擎，主要用于全文搜索、结构化搜索和分析。在EyuForum中，我们使用Elasticsearch来存储和搜索帖子和评论..."
 }
 ```
 
 **错误返回：**
 | 状态码 | 错误信息 | 说明 |
 |--------|---------|------|
-| 401 | `{"error": "Authorization header required"}` | 缺少认证头 |
-| 404 | `{"error": "folder not found"}` | 收藏夹不存在 |
-| 403 | `{"error": "folder not yours"}` | 收藏夹不属于用户 |
-| 500 | `{"error": "Failed to get favorites"}` | 获取失败 |
+| 400 | `{"error": "Invalid request"}` | 请求参数错误 |
+| 500 | `{"error": "Failed to get relevant documents"}` | 获取相关文档失败 |
 
-**测试用例：**
-1. 正常获取：`GET /api/folders/1/posts?page=1&page_size=10`
-2. 不存在的收藏夹：`GET /api/folders/999/posts`
-3. 无权限访问：使用其他用户的 token
+### 7.2 AI 问答（流式传输）
 
-## 7. 拉黑接口
+**请求：**
+```http
+POST /api/ai/ask/stream
+Content-Type: application/json
 
-### 7.1 拉黑用户
+{
+  "question": "如何使用Elasticsearch？"
+}
+```
+
+**响应：**
+- 响应类型：`text/event-stream`
+- 响应格式：SSE (Server-Sent Events)
+
+```
+data: 基于论坛内容的回答：
+
+data: 
+
+data: 相关内容：
+
+data: 
+
+data: 1. 标题: Elasticsearch使用指南
+内容: Elasticsearch是一个强大的搜索引擎，可用于论坛的内容搜索和分析。
+
+data: 
+
+data: 问题：如何使用Elasticsearch？
+
+data: 
+
+data: 这是一个基于论坛内容的智能回答。
+
+data: [DONE]
+```
+
+**错误返回：**
+| 状态码 | 错误信息 | 说明 |
+|--------|---------|------|
+| 400 | `{"error": "Invalid request"}` | 请求参数错误 |
+| 500 | `{"error": "Failed to get relevant documents"}` | 获取相关文档失败 |
+
+### 7.3 AI 接口实现说明
+
+- **技术栈**：使用字节跳动的 Eino 库实现 RAG (Retrieval-Augmented Generation) 模式
+- **数据流**：
+  1. 接收用户问题
+  2. 从 Elasticsearch 检索相关文档
+  3. 使用 Eino 库的 ChatModelAgent 生成回答
+  4. 支持标准 JSON 响应和流式 SSE 响应
+- **特点**：
+  - 基于论坛真实内容生成回答
+  - 支持实时流式输出
+  - 集成字节跳动 Eino 库的能力
+
+## 8. 拉黑接口
+
+### 8.1 拉黑用户
 
 **请求：**
 ```http
@@ -1862,34 +1902,11 @@ Authorization: Bearer <access_token>
 **字段说明：**
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `post_id` | string | 帖子ID，点击可跳转到对应帖子 |
-| `comment_id` | string | 评论ID（回复帖子时为空或不存在） |
-| `sender_id` | string | 回复者用户ID，可用于获取发送者信息 |
+| `post_id` | string | 帖子ID |
+| `comment_id` | string | 评论ID（回复帖子时为空） |
+| `sender_id` | string | 回复者用户ID |
 | `type` | string | 消息类型：`reply_post` 或 `reply_comment` |
-| `time` | number | 消息时间戳（Unix时间，秒级） |
-
-**前端使用示例：**
-```typescript
-// 获取信箱消息
-const response = await inboxApi.getMessages({
-  page: 1,
-  page_size: 10
-})
-
-// 处理消息列表
-const messages = response.messages
-messages.forEach(msg => {
-  // 根据类型判断是回复帖子还是评论
-  if (msg.type === 'reply_post') {
-    console.log('有人回复了你的帖子')
-  } else if (msg.type === 'reply_comment') {
-    console.log('有人回复了你的评论')
-  }
-  
-  // 跳转到帖子详情
-  router.push(`/post/${msg.post_id}`)
-})
-```
+| `time` | number | 消息时间戳（Unix时间） |
 
 **错误返回：**
 | 状态码 | 错误信息 | 说明 |
@@ -1922,19 +1939,8 @@ Authorization: Bearer <access_token>
 | 401 | `{"error": "Authorization header required"}` | 缺少认证头 |
 | 500 | `{"error": "Failed to clear inbox"}` | 清空失败 |
 
-**前端使用示例：**
-```typescript
-// 清空信箱
-await inboxApi.clearInbox()
-console.log('信箱已清空')
-
-// 清空后刷新消息列表
-await fetchMessages()
-```
-
 **测试用例：**
 1. 正常清空：`DELETE /api/inbox`
-2. 清空后验证：再次获取信箱应返回空列表
 
 ## 10. 管理员接口
 
