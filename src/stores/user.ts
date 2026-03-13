@@ -64,8 +64,11 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       error.value = ''
       const response = await userApi.getUserInfo()
+      console.log('获取用户信息响应:', response)
+      console.log('response.user:', response.user)
       // 后端返回格式: { user: { ... } }
       user.value = response.user || response
+      console.log('user.value:', user.value)
     } catch (err: any) {
       error.value = err.response?.error || '获取用户信息失败'
       console.error('获取用户信息错误:', err)
