@@ -268,9 +268,11 @@ onMounted(() => {
 
 .user-header {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   gap: 2rem;
   padding: 1rem;
+  text-align: center;
 }
 
 .user-avatar {
@@ -402,12 +404,6 @@ onMounted(() => {
 @media (max-width: 768px) {
   .user-profile-container {
     padding: 0 1rem;
-  }
-
-  .user-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
   }
 
   .user-meta {
