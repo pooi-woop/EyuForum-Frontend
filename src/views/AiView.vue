@@ -130,7 +130,7 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
               answer += data + '\n'
               
               // 更新AI回复内容
-              const index = messages.value.findIndex(msg => msg.id === aiMessageId)
+              const index = messages.value.findIndex((msg) => msg.id === aiMessageId)
               if (index !== -1) {
                 messages.value[index].content = answer
               }
