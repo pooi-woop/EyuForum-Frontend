@@ -55,16 +55,19 @@ const fetchMessages = async () => {
         messages.value = response.messages
         total.value = response.total || response.messages.length
         
-        for (const msg of messages.value) {
-          if (msg.sender_id) {
-            try {
-              const userResponse = await userApi.getUserProfile(msg.sender_id)
-              msg.sender = userResponse.user || userResponse
-            } catch (err) {
-              console.error('获取发送者信息失败:', err)
+        // 并行获取所有发送者信息
+        await Promise.all(
+          messages.value.map(async (msg) => {
+            if (msg.sender_id) {
+              try {
+                const userResponse = await userApi.getUserProfile(msg.sender_id)
+                msg.sender = userResponse.user || userResponse
+              } catch (err) {
+                console.error('获取发送者信息失败:', err)
+              }
             }
-          }
-        }
+          })
+        )
       } else if (Array.isArray(response)) {
         messages.value = response
         total.value = response.length
