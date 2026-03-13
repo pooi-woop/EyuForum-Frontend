@@ -22,10 +22,10 @@ function parseJSON(jsonString: string): any {
         const value = data[key]
         
         // 检查是否是收藏夹相关的id
-        const isFolderId = key === 'id' && (data.name !== undefined) // 收藏夹有name字段
+        const isFolderId = key === 'id' && (data.name !== undefined) && (data.type === 'folder') // 收藏夹有name字段且type为folder
         const isFolderRelated = key === 'folder_id' || key === 'folderId'
         
-        // 只转换需要大数字处理的字段，排除收藏夹相关的id
+        // 转换所有id字段为字符串，避免精度丢失
         if ((key === 'id' || key.endsWith('_id')) && typeof value === 'number' && !isFolderId && !isFolderRelated) {
           processed[key] = String(value)
         } else {
@@ -64,7 +64,7 @@ api.interceptors.request.use(
       config.headers = config.headers || {}
       config.headers.Authorization = `Bearer ${token}`
     }
-    console.log('发送请求:', config.method?.toUpperCase(), config.url, config.data, config.params)
+    console.log('发送请求:', config.method?.toUpperCase(), config.url, config.data, config.params, '是否携带token:', !!token)
     return config
   },
   (error: any) => {
