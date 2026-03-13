@@ -50,23 +50,28 @@ const fetchMessages = async () => {
       page_size: pageSize.value
     })
     
-    if (response && response.messages) {
-      messages.value = response.messages
-      total.value = response.total || response.messages.length
-      
-      for (const msg of messages.value) {
-        if (msg.sender_id) {
-          try {
-            const userResponse = await userApi.getUserProfile(msg.sender_id)
-            msg.sender = userResponse.user || userResponse
-          } catch (err) {
-            console.error('获取发送者信息失败:', err)
+    if (response) {
+      if (response.messages && Array.isArray(response.messages)) {
+        messages.value = response.messages
+        total.value = response.total || response.messages.length
+        
+        for (const msg of messages.value) {
+          if (msg.sender_id) {
+            try {
+              const userResponse = await userApi.getUserProfile(msg.sender_id)
+              msg.sender = userResponse.user || userResponse
+            } catch (err) {
+              console.error('获取发送者信息失败:', err)
+            }
           }
         }
+      } else if (Array.isArray(response)) {
+        messages.value = response
+        total.value = response.length
+      } else {
+        messages.value = []
+        total.value = response.total || 0
       }
-    } else if (response && Array.isArray(response)) {
-      messages.value = response
-      total.value = response.length
     } else {
       messages.value = []
       total.value = 0
