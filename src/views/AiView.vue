@@ -61,11 +61,23 @@ const sendNormalQuestion = async (question: string, messageId: string) => {
     isLoading.value = true
     
     const response = await aiApi.ask({ question })
+    console.log('AI API响应:', response)
+    
+    // 确保answer是字符串
+    let answer = response.answer || '抱歉，我无法回答这个问题。'
+    if (typeof answer !== 'string') {
+      answer = String(answer)
+    }
+    
+    // 清理乱码和异常字符
+    answer = answer.replace(/\uFFFD/g, '') // 替换无效字符
+    answer = answer.replace(/[\s\r\n]+/g, ' ') // 清理多余空白
+    answer = answer.trim()
     
     // 添加AI回复
     messages.value.push({
       id: generateId(),
-      content: response.answer || '抱歉，我无法回答这个问题。',
+      content: answer,
       role: 'ai',
       timestamp: Date.now()
     })
@@ -89,6 +101,13 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
   try {
     isStreamingLoading.value = true
     
+    // 显示弹窗提示
+    ElMessage({
+      message: '由于当前大模型相关技术问题，流式传输暂不可用，现在展示的是伪实现',
+      type: 'info',
+      duration: 3000
+    })
+    
     const aiMessageId = generateId()
     
     // 添加一个空的AI回复，后续会更新
@@ -99,50 +118,45 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
       timestamp: Date.now()
     })
     
-    const token = localStorage.getItem('auth_token')
-    const response = await fetch('/api/ai/ask/stream', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-      },
-      body: JSON.stringify({ question })
-    })
+    // 使用普通API请求作为伪实现
+    console.log('使用伪实现（普通API请求）')
+    const response = await aiApi.ask({ question })
+    console.log('AI API响应:', response)
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    // 确保answer是字符串
+    let fullAnswer = response.answer || '抱歉，我无法回答这个问题。'
+    if (typeof fullAnswer !== 'string') {
+      fullAnswer = String(fullAnswer)
     }
     
-    const reader = response.body?.getReader()
-    const decoder = new TextDecoder()
-    let answer = ''
+    console.log('原始答案:', fullAnswer)
+    console.log('答案长度:', fullAnswer.length)
     
-    if (reader) {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.substring(6).trim()
-            if (data && data !== '[DONE]') {
-              answer += data + '\n'
-              
-              // 更新AI回复内容
-              const index = messages.value.findIndex((msg) => msg.id === aiMessageId)
-              if (index !== -1) {
-                if (messages.value[index]) {
-                  messages.value[index].content = answer
-                }
-              }
-            }
-          }
-        }
+    // 清理乱码和异常字符
+    fullAnswer = fullAnswer.replace(/\uFFFD/g, '') // 替换无效字符
+    fullAnswer = fullAnswer.replace(/[\s\r\n]+/g, ' ') // 清理多余空白
+    fullAnswer = fullAnswer.trim()
+    
+    console.log('清理后答案:', fullAnswer)
+    
+    // 模拟流式效果，逐字显示
+    let displayAnswer = ''
+    for (const char of fullAnswer) {
+      // 跳过控制字符
+      if (char.charCodeAt(0) < 32 && char !== '\n' && char !== '\t') {
+        continue
       }
+      displayAnswer += char
+      // 更新AI回复内容
+      const index = messages.value.findIndex((msg) => msg.id === aiMessageId)
+      if (index !== -1 && messages.value[index]) {
+        messages.value[index].content = displayAnswer
+      }
+      // 控制速度
+      await new Promise(resolve => setTimeout(resolve, 30))
     }
+    
+    console.log('伪实现完成，最终答案:', displayAnswer)
   } catch (err: any) {
     console.error('AI 流式问答错误:', err)
     ElMessage.error(err.message || 'AI 流式问答失败')
