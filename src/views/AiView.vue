@@ -99,10 +99,12 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
       timestamp: Date.now()
     })
     
-    const response = await fetch('http://localhost:8080/api/ai/ask/stream', {
+    const token = localStorage.getItem('auth_token')
+    const response = await fetch('/api/ai/ask/stream', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
       },
       body: JSON.stringify({ question })
     })
@@ -132,7 +134,9 @@ const sendStreamQuestion = async (question: string, messageId: string) => {
               // 更新AI回复内容
               const index = messages.value.findIndex((msg) => msg.id === aiMessageId)
               if (index !== -1) {
-                messages.value[index].content = answer
+                if (messages.value[index]) {
+                  messages.value[index].content = answer
+                }
               }
             }
           }

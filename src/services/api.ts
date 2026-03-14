@@ -43,7 +43,7 @@ function parseJSON(jsonString: string): any {
 const api = axios.create({
   // 使用相对路径，通过 Vite 代理转发到后端
   baseURL: '/api',
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json'
   },

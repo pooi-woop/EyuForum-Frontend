@@ -320,11 +320,11 @@ export const inboxApi = {
 export const aiApi = {
   // AI 问答
   ask: (data: { question: string }): Promise<any> => {
-    return api.post('/api/ai/ask', data)
+    return api.post('/ai/ask', data)
   },
   
   // AI 问答（流式传输）
   askStream: (data: { question: string }): Promise<any> => {
-    return api.post('/api/ai/ask/stream', data)
+    return api.post('/ai/ask/stream', data)
   }
 }
