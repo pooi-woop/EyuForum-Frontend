@@ -253,6 +253,31 @@ const baseURL = import.meta.env.VITE_API_BASE_URL
 - [前端接口文档](./前端接口文档.md) - 详细的 API 使用说明
 - [后端接口文档](./后端接口文档/API.md) - 后端 API 文档
 
+## 自动部署
+
+本项目配置了 GitHub Actions 自动部署工作流，当代码推送到 `main` 分支时，会自动构建并部署到云服务器。
+
+### 配置步骤
+
+1. **在 GitHub 仓库中设置以下 Secrets**：
+
+   - `SSH_PRIVATE_KEY`：服务器的 SSH 私钥（用于连接服务器）
+   - `REMOTE_HOST`：服务器 IP 地址或域名
+   - `REMOTE_USER`：服务器登录用户名
+   - `REMOTE_TARGET`：部署目标目录（如 `/var/www/eyuforum`）
+
+2. **推送代码到 main 分支**：
+
+   当代码推送到 `main` 分支时，GitHub Actions 会自动：
+   - 检查代码
+   - 安装依赖
+   - 构建项目
+   - 通过 SSH 部署到指定服务器
+
+### 部署工作流文件
+
+工作流配置文件位于 `.github/workflows/deploy.yml`，包含完整的部署流程。
+
 ## 开源协议
 
 [MIT License](LICENSE)
