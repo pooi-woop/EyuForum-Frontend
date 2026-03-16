@@ -17,8 +17,8 @@ onMounted(() => {
 const fetchWeather = async () => {
   try {
     isLoading.value = true
-    // 直接调用getWeatherByIp接口，后端会自动从请求头获取IP
-    const response = await weatherApi.getWeatherByIp('')
+    // 直接调用getCurrentWeather接口，后端会自动获取客户端IP
+    const response = await weatherApi.getCurrentWeather()
     weatherData.value = response
   } catch (err: any) {
     console.error('获取天气信息失败:', err)
