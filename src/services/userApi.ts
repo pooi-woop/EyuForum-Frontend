@@ -338,6 +338,7 @@ export const weatherApi = {
   
   // 根据IP获取天气信息
   getWeatherByIp: (ip: string): Promise<any> => {
-    return api.get('/weather/by-ip', { params: { ip } })
+    const params = ip ? { ip } : {}
+    return api.get('/weather/by-ip', { params })
   }
 }
