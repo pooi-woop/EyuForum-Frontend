@@ -133,7 +133,7 @@ const clearInbox = () => {
 }
 
 const viewPost = (message: Message) => {
-  router.push(`/post/${message.post_id}`)
+  router.push(`/forum/${message.post_id}`)
 }
 
 const openReplyDialog = (message: Message) => {
