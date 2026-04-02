@@ -713,6 +713,10 @@ onMounted(() => {
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  color: #333;
 }
 
 .loading {

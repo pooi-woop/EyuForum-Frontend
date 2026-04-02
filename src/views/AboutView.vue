@@ -57,6 +57,10 @@ const socialLinks = [
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100vh;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
 }
 
 .about-container h1 {

@@ -101,6 +101,7 @@ const handleLogoutAll = async () => {
     <el-menu-item index="/">首页</el-menu-item>
     <el-menu-item index="/forum">论坛</el-menu-item>
     <el-menu-item index="/ai">AI 问答</el-menu-item>
+    <el-menu-item index="/link">友站</el-menu-item>
     <el-menu-item index="/about">关于</el-menu-item>
 
     <!-- 搜索框 -->
@@ -161,7 +162,8 @@ const handleLogoutAll = async () => {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
   border-bottom: none;
 }
 

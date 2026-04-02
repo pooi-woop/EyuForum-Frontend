@@ -135,6 +135,10 @@ const handleCancel = () => {
   margin: 0 auto;
   padding: clamp(1rem, 3vw, 2rem);
   box-sizing: border-box;
+  min-height: 100vh;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
 }
 
 .create-post-box {

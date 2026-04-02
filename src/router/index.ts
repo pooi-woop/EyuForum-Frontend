@@ -88,6 +88,11 @@ const router = createRouter({
       path: '/ai',
       name: 'ai',
       component: () => import('../views/AiView.vue')
+    },
+    {
+      path: '/link',
+      name: 'link',
+      component: () => import('../views/LinkView.vue')
     }
   ]
 })

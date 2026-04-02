@@ -61,10 +61,10 @@
 body {
   min-height: 100vh;
   color: var(--color-text);
-  background: var(--color-background);
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
   transition:
-    color 0.5s,
-    background-color 0.5s;
+    color 0.5s;
   line-height: 1.6;
   font-family:
     Inter,

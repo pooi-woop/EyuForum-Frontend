@@ -54,7 +54,8 @@ const handleImageError = (e: Event) => {
 <style scoped>
 .avatar-container {
   overflow: hidden;
-  background: #f0f0f0;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;

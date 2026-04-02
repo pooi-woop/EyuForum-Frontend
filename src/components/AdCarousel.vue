@@ -136,6 +136,8 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   padding: 1rem 0;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
 }
 
 .carousel-container {

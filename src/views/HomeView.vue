@@ -9,7 +9,6 @@ import { InfoFilled, WarningFilled, Refresh } from '@element-plus/icons-vue'
 const router = useRouter()
 const weatherData = ref<any>(null)
 const isLoading = ref(false)
-const testIp = ref('')
 
 onMounted(() => {
   fetchWeather()
@@ -24,26 +23,6 @@ const fetchWeather = async () => {
   } catch (err: any) {
     console.error('获取天气信息失败:', err)
     const errorMessage = err.response?.data?.error || '获取天气信息失败，请稍后重试'
-    ElMessage.error(errorMessage)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-const testWeatherByIp = async () => {
-  if (!testIp.value) {
-    ElMessage.warning('请输入IP地址')
-    return
-  }
-  try {
-    isLoading.value = true
-    // 使用用户输入的IP地址测试天气
-    const response = await weatherApi.getWeatherByIp(testIp.value)
-    weatherData.value = response
-    ElMessage.success('测试成功')
-  } catch (err: any) {
-    console.error('测试天气信息失败:', err)
-    const errorMessage = err.response?.data?.error || '测试天气信息失败，请稍后重试'
     ElMessage.error(errorMessage)
   } finally {
     isLoading.value = false
@@ -102,19 +81,11 @@ const testWeatherByIp = async () => {
                 <span>风速: {{ weatherData.wind_speed }} km/h</span>
               </div>
             </div>
-            <div class="weather-test">
-              <el-input v-model="testIp" placeholder="输入IP地址测试" style="width: 180px; margin-bottom: 10px" />
-              <el-button type="primary" size="small" @click="testWeatherByIp">测试</el-button>
-            </div>
             <div class="weather-update">{{ weatherData.updated_at }}</div>
           </div>
           <div v-else class="weather-error">
             <el-icon><WarningFilled /></el-icon>
             <span>无法获取天气信息</span>
-            <div class="weather-test">
-              <el-input v-model="testIp" placeholder="输入IP地址测试" style="width: 180px; margin: 10px 0" />
-              <el-button type="primary" size="small" @click="testWeatherByIp">测试</el-button>
-            </div>
           </div>
         </div>
       </div>
@@ -135,12 +106,11 @@ const testWeatherByIp = async () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1920&q=80');
+  background-image: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   z-index: -1;
-  filter: brightness(0.6);
 }
 
 .main-content {
@@ -255,14 +225,6 @@ const testWeatherByIp = async () => {
   color: #999;
   text-align: right;
   margin-top: 0.5rem;
-}
-
-.weather-test {
-  margin: 1rem 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .weather-error {

@@ -392,6 +392,10 @@ const getBlockTime = (user: any) => {
   max-width: 1000px;
   margin: 2rem auto;
   padding: 0 2rem;
+  min-height: 100vh;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
 }
 
 h1 {

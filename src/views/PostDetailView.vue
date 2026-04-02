@@ -773,16 +773,25 @@ onMounted(async () => {
   max-width: 800px;
   margin: 2rem auto;
   padding: 0 2rem;
+  min-height: 100vh;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
 }
 
+/* 半透明黑色画板样式 */
 .post-detail {
   margin-bottom: 3rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2rem;
+  border-radius: 8px;
+  color: #fff;
 }
 
 .post-title {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #333;
+  color: #fff;
   margin: 0 0 1rem 0;
   line-height: 1.3;
 }
@@ -807,13 +816,13 @@ onMounted(async () => {
 .post-author {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #333;
+  color: #fff;
 }
 
 .author-link {
   display: flex;
   align-items: center;
-  color: #333;
+  color: #fff;
   text-decoration: none;
 }
 
@@ -829,11 +838,11 @@ onMounted(async () => {
   display: flex;
   gap: 1rem;
   font-size: 0.85rem;
-  color: #999;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .post-views {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
 }
 
@@ -841,14 +850,15 @@ onMounted(async () => {
 .favorite-panel {
   min-width: 300px;
   padding: 16px;
-  background: #fff;
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #fff;
 }
 
 .favorite-header {
   margin-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding-bottom: 8px;
 }
 
@@ -856,7 +866,7 @@ onMounted(async () => {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #fff;
 }
 
 .favorite-folders {
@@ -867,12 +877,18 @@ onMounted(async () => {
 
 .no-folders {
   padding: 16px 0;
+  color: #fff;
 }
 
 .folder-checkbox {
   display: block;
   margin-bottom: 8px;
   font-size: 14px;
+  color: #fff;
+}
+
+:deep(.el-checkbox__label) {
+  color: #fff;
 }
 
 .favorite-actions {
@@ -887,7 +903,7 @@ onMounted(async () => {
   width: 100%;
   justify-content: flex-start;
   padding-left: 0;
-  color: #666;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .create-folder-button:hover {
@@ -895,7 +911,7 @@ onMounted(async () => {
 }
 
 .post-content {
-  color: #333;
+  color: #fff;
   line-height: 1.6;
   margin-bottom: 2rem;
   white-space: pre-wrap;
@@ -906,7 +922,7 @@ onMounted(async () => {
   gap: 1rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .comments-section {
@@ -916,12 +932,25 @@ onMounted(async () => {
 .comments-section h2 {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #333;
+  color: #fff;
   margin-bottom: 1.5rem;
 }
 
 .comment-input {
   margin-bottom: 2rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+:deep(.el-input__textarea) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+:deep(.el-input__textarea::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .comments-list {
@@ -933,10 +962,18 @@ onMounted(async () => {
 
 .comment-card {
   transition: box-shadow 0.3s ease;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-card__body) {
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
 }
 
 .comment-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .comment-header {
@@ -947,16 +984,16 @@ onMounted(async () => {
 
 .comment-author {
   font-weight: bold;
-  color: #333;
+  color: #fff;
 }
 
 .comment-time {
   font-size: 0.8rem;
-  color: #999;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .comment-content {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.5;
 }
 
@@ -969,30 +1006,23 @@ onMounted(async () => {
 .reply-input-section {
   margin-top: 0.75rem;
   padding: 0.75rem;
-  background: #f5f5f5;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-}
-
-.reply-actions {
-  margin-top: 0.5rem;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
 }
 
 /* 楼中楼回复样式 */
 .replies-section {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px dashed #e0e0e0;
-  background: #f9f9f9;
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   padding: 0.75rem;
 }
 
 .reply-item {
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .reply-item:last-child {
@@ -1013,11 +1043,11 @@ onMounted(async () => {
 
 .reply-time {
   font-size: 0.75rem;
-  color: #999;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .reply-content {
-  color: #555;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.9rem;
   line-height: 1.4;
 }
@@ -1025,17 +1055,23 @@ onMounted(async () => {
 .empty-state {
   text-align: center;
   padding: 3rem 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  color: #fff;
 }
 
 .loading-state {
   margin: 2rem 0;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2rem;
+  border-radius: 8px;
 }
 
 .error-message {
   margin: 2rem 0;
   padding: 1rem;
-  background: #fef0f0;
-  border: 1px solid #fbc4c4;
+  background: rgba(245, 108, 108, 0.2);
+  border: 1px solid rgba(251, 196, 196, 0.3);
   border-radius: 4px;
   color: #f56c6c;
   text-align: center;
@@ -1045,6 +1081,62 @@ onMounted(async () => {
   margin-top: 2rem;
   display: flex;
   justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+:deep(.el-pagination__total),
+:deep(.el-pagination__sizes),
+:deep(.el-pagination__jump),
+:deep(.el-pagination__page-btn),
+:deep(.el-pagination__prev),
+:deep(.el-pagination__next) {
+  color: #fff;
+}
+
+:deep(.el-pagination__page-btn.is-current) {
+  background-color: #409eff;
+  color: #fff;
+}
+
+/* 对话框样式 */
+:deep(.el-dialog) {
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+:deep(.el-dialog__title) {
+  color: #fff;
+}
+
+:deep(.el-dialog__body) {
+  color: #fff;
+}
+
+:deep(.el-form-item__label) {
+  color: #fff;
+}
+
+:deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+:deep(.el-input__input) {
+  color: #fff;
+}
+
+:deep(.el-input__input::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+:deep(.el-divider) {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 @media (max-width: 768px) {

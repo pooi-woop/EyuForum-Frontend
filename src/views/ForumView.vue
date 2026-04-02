@@ -194,7 +194,6 @@ onMounted(() => {
       v-loading="isLoading"
       :data="posts"
       style="width: 100%"
-      stripe
     >
       <el-table-column prop="title" label="标题" min-width="200">
         <template #default="{ row }">
@@ -278,6 +277,78 @@ onMounted(() => {
   margin: 0;
   padding: 2rem;
   box-sizing: border-box;
+  min-height: 100vh;
+  background: url('../assets/LinkPhoto/7ff84c885b2fdb45d7faee23e82371261035330202.png') no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
+}
+
+/* 帖子展示栏样式 */
+:deep(.el-table) {
+  background: rgba(0, 0, 0, 0.5) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+:deep(.el-table th) {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: #fff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+:deep(.el-table tr) {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+:deep(.el-table tr:hover) {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+:deep(.el-table td) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+:deep(.el-table__row--striped) {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+:deep(.el-table__body tr.el-table__row) {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+:deep(.el-table__body tr.el-table__row--striped) {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 链接颜色 */
+:deep(.el-link--primary) {
+  color: #409eff;
+}
+
+:deep(.el-link--primary:hover) {
+  color: #66b1ff;
+}
+
+/* 按钮颜色 */
+:deep(.el-button--primary) {
+  background-color: #409eff;
+  border-color: #409eff;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #66b1ff;
+  border-color: #66b1ff;
+}
+
+:deep(.el-button--danger) {
+  background-color: #f56c6c;
+  border-color: #f56c6c;
+}
+
+:deep(.el-button--danger:hover) {
+  background-color: #f78989;
+  border-color: #f78989;
 }
 
 .forum-header {
@@ -313,10 +384,25 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
+  background: rgba(0, 0, 0, 0.5);
   padding: 1rem;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
+  color: #fff;
+}
+
+.pagination-fixed :deep(.el-pagination__total),
+.pagination-fixed :deep(.el-pagination__sizes),
+.pagination-fixed :deep(.el-pagination__jump),
+.pagination-fixed :deep(.el-pagination__page-btn),
+.pagination-fixed :deep(.el-pagination__prev),
+.pagination-fixed :deep(.el-pagination__next) {
+  color: #fff;
+}
+
+.pagination-fixed :deep(.el-pagination__page-btn.is-current) {
+  background-color: #409eff;
+  color: #fff;
 }
 
 .pagination-placeholder {
